@@ -1,0 +1,52 @@
+Basic Security Configuration
+
+! Enable SSH access
+hostname HQ-SWITCH
+ip domain-name xyzcorp.com
+crypto key generate rsa modulus 2048
+username admin privilege 15 secret securepassword
+line vty 0 15
+ transport input ssh
+ login local
+
+ On HQ-Router
+
+
+router ospf 1
+ router-id 1.1.1.1
+ network 192.168.10.0 0.0.0.255 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+ network 172.16.1.0 0.0.0.3 area 0
+ network 172.16.2.0 0.0.0.3 area 1
+ passive-interface vlan10
+ passive-interface vlan20
+
+
+QoS Configuration for VoIP
+
+
+! Classify voice traffic
+class-map match-any VOICE
+ match ip dscp ef 
+ match ip dscp cs3
+
+! Policy Map to prioritize voice
+policy-map WAN-QOS
+ class VOICE
+  priority percent 20
+ class class-default
+  fair-queue
+
+
+
+HSRP Redundancy Configuration
+
+ On L3-Switch-HQ
+interface Vlan10
+ ip address 192.168.10.2 255.255.255.0
+ standby 10 ip 192.168.10.1
+ standby 10 priority 110
+ standby 10 preempt
+
+
+
